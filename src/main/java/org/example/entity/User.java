@@ -1,28 +1,31 @@
 package org.example.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
+@SuppressWarnings("unused")
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
+
     private String email;
-    private int age;
+
+    private Integer age;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public User() {
-        this.createdAt = LocalDateTime.now();
+        // Для Hibernate
     }
 
-    public User(String name, String email, int age) {
+    public User(String name, String email, Integer age) {
         this.name = name;
         this.email = email;
         this.age = age;
@@ -39,13 +42,12 @@ public class User {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public int getAge() { return age; }
-    public void setAge(int age) { this.age = age; }
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    // toString()
     @Override
     public String toString() {
         return "User{" +

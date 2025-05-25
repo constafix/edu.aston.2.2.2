@@ -1,27 +1,30 @@
 package org.example.dao;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.entity.User;
 import org.example.util.HibernateUtil;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.apache.log4j.Logger;
 
 import java.util.List;
 
 public class UserDao {
-    private static final Logger logger = Logger.getLogger(UserDao.class);
+
+    private static final Logger logger = LogManager.getLogger(UserDao.class);
 
     public void createUser(User user) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.save(user);
+
+            session.persist(user);
+
             transaction.commit();
-            logger.info("Пользователь успешно создан: " + user);
-        } catch (HibernateException e) {
+            logger.info("User created: {}", user);
+        } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            logger.error("Ошибка при создании пользователя", e);
+            logger.error("Failed to create user: {}", e.getMessage(), e);
         }
     }
 
@@ -29,24 +32,24 @@ public class UserDao {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             User user = session.get(User.class, id);
             if (user != null) {
-                logger.info("Найден пользователь: " + user);
+                logger.info("User retrieved: {}", user);
             } else {
-                logger.info("Пользователь с ID " + id + " не найден");
+                logger.info("User with id {} not found", id);
             }
             return user;
-        } catch (HibernateException e) {
-            logger.error("Ошибка при получении пользователя", e);
+        } catch (Exception e) {
+            logger.error("Failed to get user: {}", e.getMessage(), e);
             return null;
         }
     }
 
     public List<User> getAllUsers() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<User> users = session.createQuery("FROM User", User.class).list();
-            logger.info("Получен список пользователей: " + users.size());
+            List<User> users = session.createQuery("from User", User.class).list();
+            logger.info("Retrieved {} users", users.size());
             return users;
-        } catch (HibernateException e) {
-            logger.error("Ошибка при получении списка пользователей", e);
+        } catch (Exception e) {
+            logger.error("Failed to get all users: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -55,30 +58,34 @@ public class UserDao {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.update(user);
+
+            session.merge(user);
+
             transaction.commit();
-            logger.info("Пользователь успешно обновлен: " + user);
-        } catch (HibernateException e) {
+            logger.info("User updated: {}", user);
+        } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            logger.error("Ошибка при обновлении пользователя", e);
+            logger.error("Failed to update user: {}", e.getMessage(), e);
         }
     }
 
     public void deleteUser(Long id) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+
             User user = session.get(User.class, id);
             if (user != null) {
-                transaction = session.beginTransaction();
-                session.delete(user);
-                transaction.commit();
-                logger.info("Пользователь успешно удалён: " + user);
+                session.remove(user);
+                logger.info("User deleted: {}", user);
             } else {
-                logger.warn("Пользователь с ID " + id + " не найден для удаления");
+                logger.info("User with id {} not found for deletion", id);
             }
-        } catch (HibernateException e) {
+
+            transaction.commit();
+        } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            logger.error("Ошибка при удалении пользователя", e);
+            logger.error("Failed to delete user: {}", e.getMessage(), e);
         }
     }
 }
