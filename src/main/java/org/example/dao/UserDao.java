@@ -41,7 +41,7 @@ public class UserDao {
 
     public User getUserById(Long id) {
         try (Session session = sessionFactory.openSession()) {
-            return session.get(User.class, id);
+            return session.find(User.class, id);
         } catch (Exception e) {
             logger.error("Не удалось получить пользователя с ID {}", id, e);
             throw e;
@@ -74,7 +74,7 @@ public class UserDao {
     public void deleteUser(Long id) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {
-            User user = session.get(User.class, id);
+            User user = session.find(User.class, id);
             if (user != null) {
                 tx = session.beginTransaction();
                 session.remove(user);

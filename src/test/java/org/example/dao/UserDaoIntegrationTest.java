@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserDaoIntegrationTest {
 
-    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.2")
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.2")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
