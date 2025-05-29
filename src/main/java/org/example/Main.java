@@ -1,15 +1,18 @@
 package org.example;
 
-import org.example.dao.UserDao;
 import org.example.entity.User;
+import org.example.service.UserService;
 import org.example.util.HibernateUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
-    private static final UserDao userDao = new UserDao();
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final UserService userService = new UserService();
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -37,13 +40,17 @@ public class Main {
                     case "6" -> {
                         running = false;
                         System.out.println("Завершение работы...");
+                        logger.info("Программа завершена пользователем.");
                     }
                     default -> System.out.println("Неверный ввод, попробуйте снова.");
                 }
             }
+        } catch (Exception e) {
+            logger.error("Ошибка в работе программы", e);
         } finally {
             HibernateUtil.shutdown();
             scanner.close();
+            logger.info("Ресурсы освобождены, приложение завершено.");
         }
     }
 
@@ -56,27 +63,32 @@ public class Main {
         int age = Integer.parseInt(scanner.nextLine());
 
         User user = new User(name, email, age);
-        userDao.createUser(user);
+        userService.createUser(user);
+        logger.info("Создан пользователь: {}", user);
     }
 
     private static void readUser() {
         System.out.print("Введите ID пользователя: ");
         Long id = Long.parseLong(scanner.nextLine());
 
-        User user = userDao.getUser(id);
+        User user = userService.getUserById(id);
         if (user != null) {
             System.out.println(user);
+            logger.info("Запрошен пользователь с ID {}", id);
         } else {
             System.out.println("Пользователь не найден.");
+            logger.warn("Пользователь с ID {} не найден", id);
         }
     }
 
     private static void readAllUsers() {
-        List<User> users = userDao.getAllUsers();
+        List<User> users = userService.getAllUsers();
         if (users != null && !users.isEmpty()) {
             users.forEach(System.out::println);
+            logger.info("Выведен список всех пользователей, количество: {}", users.size());
         } else {
             System.out.println("Пользователи не найдены.");
+            logger.warn("Список пользователей пуст");
         }
     }
 
@@ -84,9 +96,10 @@ public class Main {
         System.out.print("Введите ID пользователя для обновления: ");
         Long id = Long.parseLong(scanner.nextLine());
 
-        User user = userDao.getUser(id);
+        User user = userService.getUserById(id);
         if (user == null) {
             System.out.println("Пользователь не найден.");
+            logger.warn("Попытка обновления несуществующего пользователя с ID {}", id);
             return;
         }
 
@@ -105,13 +118,15 @@ public class Main {
             user.setAge(age);
         }
 
-        userDao.updateUser(user);
+        userService.updateUser(user);
+        logger.info("Обновлен пользователь: {}", user);
     }
 
     private static void deleteUser() {
         System.out.print("Введите ID пользователя для удаления: ");
         Long id = Long.parseLong(scanner.nextLine());
 
-        userDao.deleteUser(id);
+        userService.deleteUser(id);
+        logger.info("Удален пользователь с ID {}", id);
     }
 }

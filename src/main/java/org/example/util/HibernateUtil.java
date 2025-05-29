@@ -1,21 +1,32 @@
 package org.example.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HibernateUtil {
 
-    private static final Logger logger = LogManager.getLogger(HibernateUtil.class);
-    private static final SessionFactory sessionFactory;
+    private static final Logger logger = LoggerFactory.getLogger(HibernateUtil.class);
 
-    static {
+    private static final SessionFactory sessionFactory = buildSessionFactory();
+
+    private static SessionFactory buildSessionFactory() {
         try {
-            sessionFactory = new Configuration().configure().buildSessionFactory();
-            logger.info("SessionFactory created");
+
+            StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+                    .configure()
+                    .build();
+
+
+            SessionFactory sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
+
+            logger.info("SessionFactory успешно создана");
+            return sessionFactory;
         } catch (Throwable ex) {
-            logger.error("Initial SessionFactory creation failed.", ex);
+            logger.error("Ошибка создания SessionFactory: ", ex);
             throw new ExceptionInInitializerError(ex);
         }
     }
@@ -25,9 +36,7 @@ public class HibernateUtil {
     }
 
     public static void shutdown() {
-        if (sessionFactory != null) {
-            sessionFactory.close();
-            logger.info("SessionFactory closed");
-        }
+        logger.info("Закрытие SessionFactory");
+        getSessionFactory().close();
     }
 }
