@@ -24,7 +24,7 @@ public class UserServiceTest {
 
     @Test
     void testCreateUser() {
-        User user = new User("Alice", "alice@example.com", 30);
+        User user = new User("KD", "KD@example.com", 30);
         userService.createUser(user);
         verify(userDao, times(1)).createUser(user);
     }
@@ -55,7 +55,7 @@ public class UserServiceTest {
 
     @Test
     void testGetAllUsers() {
-        List<User> mockUsers = List.of(new User("Alice", "alice@example.com", 30));
+        List<User> mockUsers = List.of(new User("KD", "KD@example.com", 30));
         when(userDao.getAllUsers()).thenReturn(mockUsers);
 
         List<User> result = userService.getAllUsers();
@@ -73,7 +73,7 @@ public class UserServiceTest {
 
     @Test
     void testUpdateUser() {
-        User user = new User("Charlie", "charlie@example.com", 40);
+        User user = new User("Olga", "olga@example.com", 40);
         user.setId(2L);
         userService.updateUser(user);
         verify(userDao, times(1)).updateUser(user);
