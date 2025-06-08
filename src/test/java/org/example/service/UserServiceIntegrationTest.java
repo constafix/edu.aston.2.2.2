@@ -1,7 +1,6 @@
 package org.example.service;
 
 import org.example.dto.UserDto;
-import org.example.entity.User;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
