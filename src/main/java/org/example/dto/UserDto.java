@@ -1,33 +1,30 @@
-package org.example.entity;
+package org.example.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
-@Entity
-@Table(name = "users")
-public class User {
+public class UserDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @NotBlank(message = "Имя не может быть пустым")
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Email(message = "Некорректный email")
+    @NotBlank(message = "Email обязателен")
     private String email;
 
+    @Min(value = 0, message = "Возраст должен быть неотрицательным")
     private Integer age;
 
-    // Конструкторы
-    public User() {}
+    public UserDto() {}
 
-    public User(String name, String email, Integer age) {
+    public UserDto(Long id, String name, String email, Integer age) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.age = age;
     }
 
-    // Геттеры и сеттеры
     public Long getId() {
         return id;
     }

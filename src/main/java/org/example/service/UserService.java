@@ -1,53 +1,66 @@
 package org.example.service;
 
-import org.example.dao.UserDao;
+import org.example.dto.UserDto;
 import org.example.entity.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
+@Service
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final UserRepository userRepository;
 
-    private final UserDao userDao;
-
-    // Используется в основном приложении
-    public UserService() {
-        this.userDao = new UserDao();
+    public UserService(UserRepository repo) {
+        this.userRepository = repo;
     }
 
-    // Используется для тестов
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
+    // Конвертеры Entity <-> DTO
+    private UserDto toDto(User user) {
+        if (user == null) return null;
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), user.getAge());
     }
 
-    public void createUser(User user) {
-        Objects.requireNonNull(user, "Пользователь не должен быть null");
-        logger.debug("Создание пользователя: {}", user);
-        userDao.createUser(user);
+    private User toEntity(UserDto dto) {
+        if (dto == null) return null;
+        User user = new User(dto.getName(), dto.getEmail(), dto.getAge());
+        user.setId(dto.getId());
+        return user;
     }
 
-    public User getUserById(Long id) {
-        logger.debug("Получение пользователя по ID: {}", id);
-        return userDao.getUserById(id);
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
-    public List<User> getAllUsers() {
-        logger.debug("Получение всех пользователей");
-        return userDao.getAllUsers();
+    public UserDto getUserById(Long id) {
+        return userRepository.findById(id).map(this::toDto).orElse(null);
     }
 
-    public void updateUser(User user) {
-        Objects.requireNonNull(user, "Пользователь не должен быть null");
-        logger.debug("Обновление пользователя: {}", user);
-        userDao.updateUser(user);
+    public UserDto createUser(UserDto dto) {
+        User user = toEntity(dto);
+        user.setId(null); // Чтобы создавался новый
+        User saved = userRepository.save(user);
+        return toDto(saved);
     }
 
-    public void deleteUser(Long id) {
-        logger.debug("Удаление пользователя с ID: {}", id);
-        userDao.deleteUser(id);
+    public UserDto updateUser(Long id, UserDto dto) {
+        return userRepository.findById(id).map(existing -> {
+            existing.setName(dto.getName());
+            existing.setEmail(dto.getEmail());
+            existing.setAge(dto.getAge());
+            return toDto(userRepository.save(existing));
+        }).orElse(null);
+    }
+
+    public boolean deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
