@@ -61,7 +61,6 @@ public class UserServiceIntegrationTest {
         assertThat(user).isNotNull();
         assertThat(user.getEmail()).isEqualTo("inttest@example.com");
     }
-
     @Test
     @Order(3)
     void testGetAllUsers() {
